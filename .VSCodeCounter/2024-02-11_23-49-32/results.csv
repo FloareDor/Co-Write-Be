@@ -1,0 +1,13 @@
+"filename", "language", "pip requirements", "Python", "Markdown", "comment", "blank", "total"
+"c:\UFL\CodeForChange-Hackathon-2024-BE\README.md", "Markdown", 0, 0, 2, 0, 2, 4
+"c:\UFL\CodeForChange-Hackathon-2024-BE\handlers\restaurants.py", "Python", 0, 37, 0, 2, 12, 51
+"c:\UFL\CodeForChange-Hackathon-2024-BE\handlers\userHandler.py", "Python", 0, 178, 0, 34, 33, 245
+"c:\UFL\CodeForChange-Hackathon-2024-BE\main.py", "Python", 0, 22, 0, 9, 9, 40
+"c:\UFL\CodeForChange-Hackathon-2024-BE\models\schemas.py", "Python", 0, 37, 0, 15, 10, 62
+"c:\UFL\CodeForChange-Hackathon-2024-BE\requirements.txt", "pip requirements", 11, 0, 0, 1, 0, 12
+"c:\UFL\CodeForChange-Hackathon-2024-BE\routes\routes.py", "Python", 0, 45, 0, 12, 19, 76
+"c:\UFL\CodeForChange-Hackathon-2024-BE\utils\authenticator.py", "Python", 0, 113, 0, 17, 10, 140
+"c:\UFL\CodeForChange-Hackathon-2024-BE\utils\calscalculator.py", "Python", 0, 20, 0, 0, 6, 26
+"c:\UFL\CodeForChange-Hackathon-2024-BE\utils\openAI.py", "Python", 0, 44, 0, 1, 13, 58
+"c:\UFL\CodeForChange-Hackathon-2024-BE\utils\scripts.py", "Python", 0, 46, 0, 29, 16, 91
+"Total", "-", 11, 542, 2, 120, 130, 805

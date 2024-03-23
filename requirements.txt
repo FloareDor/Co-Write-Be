@@ -1,0 +1,12 @@
+# 📁 requirements.txt -----
+fastapi
+uvicorn
+pydantic
+pymongo
+python-dotenv
+authlib
+requests
+httpx
+starlette==0.27.0
+pyjwt
+slowapi

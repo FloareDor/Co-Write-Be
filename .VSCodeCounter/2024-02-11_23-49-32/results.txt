@@ -1,0 +1,42 @@
+Date : 2024-02-11 23:49:32
+Directory : c:\UFL\CodeForChange-Hackathon-2024-BE
+Total : 11 files,  555 codes, 120 comments, 130 blanks, all 805 lines
+
+Languages
++------------------+------------+------------+------------+------------+------------+
+| language         | files      | code       | comment    | blank      | total      |
++------------------+------------+------------+------------+------------+------------+
+| Python           |          9 |        542 |        119 |        128 |        789 |
+| pip requirements |          1 |         11 |          1 |          0 |         12 |
+| Markdown         |          1 |          2 |          0 |          2 |          4 |
++------------------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                           | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                              |         11 |        555 |        120 |        130 |        805 |
+| . (Files)                                                      |          3 |         35 |         10 |         11 |         56 |
+| handlers                                                       |          2 |        215 |         36 |         45 |        296 |
+| models                                                         |          1 |         37 |         15 |         10 |         62 |
+| routes                                                         |          1 |         45 |         12 |         19 |         76 |
+| utils                                                          |          4 |        223 |         47 |         45 |        315 |
++----------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| filename                                                       | language         | code       | comment    | blank      | total      |
++----------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| c:\UFL\CodeForChange-Hackathon-2024-BE\README.md               | Markdown         |          2 |          0 |          2 |          4 |
+| c:\UFL\CodeForChange-Hackathon-2024-BE\handlers\restaurants.py | Python           |         37 |          2 |         12 |         51 |
+| c:\UFL\CodeForChange-Hackathon-2024-BE\handlers\userHandler.py | Python           |        178 |         34 |         33 |        245 |
+| c:\UFL\CodeForChange-Hackathon-2024-BE\main.py                 | Python           |         22 |          9 |          9 |         40 |
+| c:\UFL\CodeForChange-Hackathon-2024-BE\models\schemas.py       | Python           |         37 |         15 |         10 |         62 |
+| c:\UFL\CodeForChange-Hackathon-2024-BE\requirements.txt        | pip requirements |         11 |          1 |          0 |         12 |
+| c:\UFL\CodeForChange-Hackathon-2024-BE\routes\routes.py        | Python           |         45 |         12 |         19 |         76 |
+| c:\UFL\CodeForChange-Hackathon-2024-BE\utils\authenticator.py  | Python           |        113 |         17 |         10 |        140 |
+| c:\UFL\CodeForChange-Hackathon-2024-BE\utils\calscalculator.py | Python           |         20 |          0 |          6 |         26 |
+| c:\UFL\CodeForChange-Hackathon-2024-BE\utils\openAI.py         | Python           |         44 |          1 |         13 |         58 |
+| c:\UFL\CodeForChange-Hackathon-2024-BE\utils\scripts.py        | Python           |         46 |         29 |         16 |         91 |
+| Total                                                          |                  |        555 |        120 |        130 |        805 |
++----------------------------------------------------------------+------------------+------------+------------+------------+------------+
