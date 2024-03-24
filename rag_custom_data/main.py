@@ -8,6 +8,7 @@ from constants import OPENAI_API_KEY
 os.environ['OPENAI_API_KEY']=OPENAI_API_KEY
 from machine import predict_sentence
 from machine import cv, spam_detect_model
+from openai import OpenAI
 
 def main():
     try: 
@@ -59,19 +60,25 @@ def chat(max_history_len=3, ai_limits="Default", highlighted_text="", user_query
         predicted_label = predict_sentence(user_query, cv, spam_detect_model)
         if predicted_label == 0:
             return "User is providing complete work. No response generated."
+        
         # Construct final prompt based on AI limits, highlighted text, and user query
         prompt = "Ensure that the response does not exceed 100 words.\nProvide responses that maintain a professional and respectful tone.\n"
         if ai_limits != "Default":
             prompt += ai_limits
         # elif ai_limits == "Professor":
-        #     prompt = "[Professor AI Limits and customization]\n\nDon't help with code.\n\nAvoid directly copying verbatim text from the input document."
-            
+        #     prompt = "[Professor AI Limits and customization]\n\nDon't help with code.\n\nAvoid directly copying verbatim text from the input document."   
 
         prompt += f"\n\n[User's Highlighted text]\n\n{highlighted_text}\n\n[User Message]\n\nUser: {user_query}\n\n"
 
         # Load the vector store and embeddings
-        embeddings = OpenAIEmbeddings()
-        vectorstore = FAISS.load_local(f"pdf-index{docname}", embeddings=embeddings, allow_dangerous_deserialization=True)
+        try:
+            embeddings = OpenAIEmbeddings()
+            vectorstore = FAISS.load_local(f"pdf-index{docname}", embeddings=embeddings, allow_dangerous_deserialization=True)
+        except Exception as e:
+            color_print.print_red(f"Error: {e}")
+            # normal gpt bro
+            print("No embeddings found for this assignment.")
+            return normal_gpt(prompt)
 
         # Initialize the language model and history
         llm = ChatOpenAI()
@@ -94,15 +101,38 @@ def chat(max_history_len=3, ai_limits="Default", highlighted_text="", user_query
             history.pop(0)
 
         return resp["answer"]
+    
+
 
     except Exception as e:
         color_print.print_red(e)
         return "An error occurred while processing your query."
+    
+
+def normal_gpt(prompt):
+    # Set OpenAI API key programmatically
+
+    # Set OpenAI API key for the OpenAI client
+    OpenAI.api_key = OPENAI_API_KEY
+
+    client = OpenAI()
+
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    return completion.choices[0].message.content
+
+    # print(completion.choices[0].message.content)
 
 
 if __name__=="__main__":
     # color_print.print_green("LLMs on Custom Data")
     # main()
-    print(chat(user_query="Do my assignment", docname="/amaan-1234"))
+    print(chat(user_query="Help with understanding photosynthesis.", docname="/amaan-12342r31tr"))
     
 

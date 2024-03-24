@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from utils.authenticator import Authenticator
 from schemas.assignment import assignmentSchema
 import re
+import requests
 
 class ProfessorHandler:
     def __init__(self, db):
@@ -14,6 +15,20 @@ class ProfessorHandler:
         self.professor_collection = db["professor"]
         self.assignments_collection = db["assignments"]
         self.authenticator = Authenticator(db)
+
+    async def call_index_function(assignment_id):
+        try:
+            url = f"http://localhost:8001/index?assignment_id={assignment_id}"
+            response = requests.get(url)
+            response.raise_for_status()  # Raise an exception for non-2xx status codes
+            if response.status_code == 200:
+                return True
+            else:
+                return False
+        except requests.exceptions.RequestException as e:
+            # Error occurred during the request
+            print(f"Error: {e}")
+            return False
 
     async def add_new_assignment(
         self,
@@ -82,10 +97,12 @@ class ProfessorHandler:
 
             try:
                 if resource_file:
-                    file_path = f"rag_custom_data/docs/{resource_file.filename}"
+                    file_path = f"rag_custom_data/docs/{assignment_id}/{resource_file.filename}"
                     with open(file_path, "wb") as buffer:
                         shutil.copyfileobj(resource_file.file, buffer)
                     assignment_data["resource_file"] = resource_file.filename
+
+
             except Exception as e:
                 print(f"resource file error: {e}")
 
@@ -95,6 +112,11 @@ class ProfessorHandler:
             result = self.assignments_collection.insert_one(assignment_data)
             # Check if the insertion was successful
             if result.acknowledged:
+                call_result = await self.call_index_function(assignment_id)
+                if call_result:
+                    print("Index function call was successful")
+                else:
+                    print("Index function call failed")
                 return JSONResponse(
                     {"message": "Assignment added successfully", "assignment_id": assignment_id},
                     status_code=200,

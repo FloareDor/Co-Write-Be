@@ -11,6 +11,8 @@ from schemas.user import userSchema
 from pydantic import ValidationError
 
 from utils.authenticator import Authenticator
+import requests
+
 
 class StudentHandler:
 	def __init__(self, db):
@@ -253,3 +255,53 @@ class StudentHandler:
 			return response
 		else:
 			raise HTTPException(status_code=404, detail=f"No assignments for you: {student_id}")
+		
+
+	async def chat(self, request: Request, authorization: str = Header(None)):
+		if authorization is None:
+			raise HTTPException(status_code=401, detail="No Authorization Token Received")
+
+		try:
+			encodedUserData = await self.authenticator.Authorize(authorization=authorization)
+		except HTTPException as http_exception:
+			return JSONResponse({"detail": f"Authorization error: {http_exception.detail}"}, status_code=http_exception.status_code)
+
+		try:
+			existingUser = self.userCollection.find_one({"sub": encodedUserData["sub"]})
+			if not existingUser:
+				raise HTTPException(status_code=404, detail="User not found")
+		except Exception as e:
+			raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+
+		try:
+			form_data = await request.form()
+			assignment_id = form_data.get("assignment_id")
+			highlighted_text = form_data.get("highlighted_text")
+			user_query = form_data.get("user_query")
+			assignment = self.assignments_collection.find_one({"_id": assignment_id})
+			if not assignment:
+				raise HTTPException(status_code=404, detail="Assignment not found")
+		except Exception as e:
+			raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+
+		ai_limitation = assignment["ai_limitation"]
+		chat_response = await self.call_chat_function(ai_limitation=ai_limitation, highlighted_text=highlighted_text, user_query=user_query, assignment_id=assignment_id)
+		return JSONResponse(content={"response": chat_response})
+
+	async def call_chat_function(self, ai_limitation="Default", highlighted_text="", user_query="", assignment_id=""):
+		try:
+			url = "http://localhost:8001/chat"
+			payload = {
+				"ai_limitation": ai_limitation,
+				"highlighted_text": highlighted_text,
+				"user_query": user_query,
+				"assignment_id": assignment_id
+			}
+			response = requests.post(url, data=payload)
+			response.raise_for_status()
+			if response.status_code == 200:
+				return response.text
+			else:
+				return JSONResponse(content={"error": response.text}, status_code=response.status_code)
+		except requests.exceptions.RequestException as e:
+			return JSONResponse(content={"error": str(e)}, status_code=500)

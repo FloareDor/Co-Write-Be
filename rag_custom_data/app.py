@@ -11,20 +11,24 @@ os.environ['OPENAI_API_KEY']=OPENAI_API_KEY
 from machine import predict_sentence
 from machine import cv, spam_detect_model
 
-def chat(max_history_len=3, ai_limits="Default", highlighted_text="", user_query="", assignment_id=""):
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+app = FastAPI()
+
+@app.post("/chat")
+async def chat(max_history_len=3, ai_limitation="Default", highlighted_text="", user_query="", assignment_id=""):
 	try:
 		if user_query == "":
 			return ""
 		predicted_label = predict_sentence(user_query, cv, spam_detect_model)
 		if predicted_label == 0:
-			return "User is providing complete work. No response generated."
+			return "I cannot help you with this. Please contact your professor."
 		# Construct final prompt based on AI limits, highlighted text, and user query
 		prompt = "Ensure that the response does not exceed 100 words.\nProvide responses that maintain a professional and respectful tone.\n"
-		if ai_limits != "Default":
-			prompt += ai_limits
-		# elif ai_limits == "Professor":
+		if ai_limitation != "Default":
+			prompt += ai_limitation
+		# elif ai_limitation == "Professor":
 		#     prompt = "[Professor AI Limits and customization]\n\nDon't help with code.\n\nAvoid directly copying verbatim text from the input document."
-			
 
 		prompt += f"\n\n[User's Highlighted text]\n\n{highlighted_text}\n\n[User Message]\n\nUser: {user_query}\n\n"
 
@@ -73,7 +77,8 @@ def get_pdf_paths(folder_path):
                 pdf_paths.append(os.path.join(root, file))
     return pdf_paths
 
-def index(assignment_id):
+@app.get("/index")
+async def index(assignment_id):
     try:
         """Read pdfs from docs folder and index them in vector database"""
         print("starting indexing...")
@@ -103,11 +108,15 @@ def index(assignment_id):
             print("saving locally")
             vectorstore.save_local(f"embeddings/{assignment_id}")
         print("Docs indexed successfully!!")
+        return JSONResponse(content={"message": "Docs indexed successfully"}, status_code=200)
     except Exception as e:
-        color_print.print_red(e)
+        return JSONResponse(content={"error": e}, status_code=500)
 
 # if __name__ == "__main__":
 # 	print(chat(user_query="Do my assignment", docname="amaan-1234"))
         
 # We need to make this an api!!!!
 
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
