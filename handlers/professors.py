@@ -168,3 +168,115 @@ class ProfessorHandler:
             return response
         else:
             raise HTTPException(status_code=404, detail=f"No assignments posted by professor: {professor_id}")
+         
+    async def get_assignment_by_id(
+        self,
+        request: Request,
+        authorization: str = Header(None),
+    ):
+        if authorization is None:
+            raise HTTPException(status_code=500, detail="No Authorization Token Received")
+
+        try:
+            # Authorize the request
+            encodedUserData = await self.authenticator.Authorize(authorization=authorization)
+            print(encodedUserData)
+        except HTTPException as http_exception:
+            # Handle authorization errors
+            return JSONResponse(
+                {"detail": f"Authorization error: {http_exception.detail}"},
+                status_code=http_exception.status_code,
+            )
+
+        try:
+            existingUser = self.userCollection.find_one(
+                {"sub": encodedUserData["sub"]}  # Query condition
+            )
+        except Exception as e:
+            print(f"USER NOT FOUND: {e}")
+            raise HTTPException(status_code=500, detail=f"USER NOT FOUND: {encodedUserData}")
+        
+        try:
+            form_data = await request.form()
+            assignment_id = form_data.get("assignment_id")
+
+            if not all([assignment_id]):
+                raise HTTPException(
+                    status_code=400,
+                    detail="assignment_id is required.",
+                )
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Error: {e}",
+            )
+        
+        professor_id = encodedUserData["_id"]
+        try:
+            assignment = self.assignments_collection.find_one(
+                {"_id": assignment_id}  # Query condition
+            )
+        except Exception as e:
+            print(f"USER NOT FOUND: {e}")
+            raise HTTPException(status_code=500, detail=f"ASSIGNMENT NOT FOUND: {e}")
+        if assignment:
+            if existingUser is not None:
+                userType = existingUser["type"]
+                if userType != "professor":
+                    assignment.pop("ai_limitation")
+                return JSONResponse(assignment, status_code=200)
+            else:
+                raise HTTPException(status_code=404, detail=f"User not found: {encodedUserData}")
+        else:
+            raise HTTPException(status_code=404, detail=f"No assignments posted by professor: {professor_id}")
+        
+    async def get_joined_students(
+        self,
+        request: Request,
+        authorization: str = Header(None),
+    ):
+        if authorization is None:
+            raise HTTPException(status_code=401, detail="No Authorization Token Received")
+
+        try:
+            # Authorize the request
+            encodedUserData = await self.authenticator.Authorize(authorization=authorization)
+        except HTTPException as http_exception:
+            # Handle authorization errors
+            return JSONResponse(
+                {"detail": f"Authorization error: {http_exception.detail}"},
+                status_code=http_exception.status_code,
+            )
+
+        try:
+            existingUser = self.userCollection.find_one(
+                {"sub": encodedUserData["sub"]}  # Query condition
+            )
+            if not existingUser or existingUser["type"] != "professor":
+                raise HTTPException(status_code=403, detail="You are not authorized to access this resource")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+        
+        if existingUser is not None:
+            userType = existingUser["type"]
+            if userType != "professor":
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"You are not a professor. If you are one, please sign up as a professor.",
+                )
+        try:
+            form_data = await request.form()
+            assignment_id = form_data.get("assignment_id")
+
+            if not assignment_id:
+                raise HTTPException(status_code=400, detail="assignment_id is required")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Error: {e}")
+
+        student_ids = [submission["student_id"] for submission in self.submissions_collection.find({"assignment_id": assignment_id}, {"student_id": 1})]
+        students = [self.userCollection.find_one({"_id": str(student_id)}, {"_id": 0, "name": 1, "email": 1}) for student_id in student_ids]
+
+        if not students:
+            raise HTTPException(status_code=404, detail="No students have joined this assignment")
+
+        return JSONResponse(students, status_code=200)

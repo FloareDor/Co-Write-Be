@@ -66,6 +66,15 @@ async def get_submissions_by_student(request: Request, authorization: str = Head
 async def chat(request: Request, authorization: str = Header(None)):
     return await studentHandler.chat(request, authorization=authorization)
 
+@router.post("/assignment-by-id")
+@limiter.limit("30/minute")
+async def get_assignment_by_id(request: Request, authorization: str = Header(None)):
+    return await professorHandler.get_assignment_by_id(request, authorization=authorization)
+
+@router.post("/joined-students")
+@limiter.limit("30/minute")
+async def get_joined_students(request: Request, authorization: str = Header(None)):
+    return await professorHandler.get_joined_students(request, authorization=authorization)
 
 
 
