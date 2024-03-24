@@ -16,7 +16,7 @@ class ProfessorHandler:
         self.assignments_collection = db["assignments"]
         self.authenticator = Authenticator(db)
 
-    async def call_index_function(assignment_id):
+    async def call_index_function(self, assignment_id):
         try:
             url = f"http://localhost:8001/index?assignment_id={assignment_id}"
             response = requests.get(url)

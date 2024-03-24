@@ -12,9 +12,10 @@ os.environ['OPENAI_API_KEY']=OPENAI_API_KEY
 from machine import predict_sentence
 from machine import cv, spam_detect_model
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+import json
 
 app = FastAPI()
 app.add_middleware(
@@ -26,13 +27,23 @@ app.add_middleware(
 )
 
 @app.post("/chat")
-async def chat(max_history_len=3, ai_limitation="Default", highlighted_text="", user_query="", assignment_id=""):
+
+async def chat(request: Request):
     try:
+        payload = await request.json()
+        # Extract individual parameters from the payload
+        user_query = payload.get("user_query")
+        ai_limitation = payload.get("ai_limitation")
+        highlighted_text = payload.get("highlighted_text")
+        assignment_id = payload.get("assignment_id")
+        print("user_query: " + user_query)
         if user_query == "":
             return ""
         predicted_label = predict_sentence(user_query, cv, spam_detect_model)
         if predicted_label == 0:
             return "User is providing complete work. No response generated."
+        
+        print("predicted_label", predicted_label)
         
         # Construct final prompt based on AI limits, highlighted text, and user query
         prompt = "Ensure that the response does not exceed 100 words.\nProvide responses that maintain a professional and respectful tone.\n"
@@ -42,7 +53,7 @@ async def chat(max_history_len=3, ai_limitation="Default", highlighted_text="", 
         #     prompt = "[Professor AI Limits and customization]\n\nDon't help with code.\n\nAvoid directly copying verbatim text from the input document."   
 
         prompt += f"\n\n[User's Highlighted text]\n\n{highlighted_text}\n\n[User Message]\n\nUser: {user_query}\n\n"
-
+        print('prompt', prompt)
         # Load the vector store and embeddings
         try:
             embeddings = OpenAIEmbeddings()
@@ -70,14 +81,14 @@ async def chat(max_history_len=3, ai_limitation="Default", highlighted_text="", 
         history.append((prompt, resp["answer"]))
 
         # Truncate the history to the specified length
-        while len(history) > max_history_len:
+        while len(history) > 3:
             history.pop(0)
 
         return resp["answer"]
 
     except Exception as e:
         color_print.print_red(e)
-        return "An error occurred while processing your query."
+        return f"An error occurred while processing your query.: {e}"
 	
 def get_pdf_paths(folder_path):
     """Returns a list of the paths of all the PDFs in the given folder."""
@@ -92,23 +103,28 @@ def normal_gpt(prompt):
     # Set OpenAI API key programmatically
 
     # Set OpenAI API key for the OpenAI client
-    OpenAI.api_key = OPENAI_API_KEY
+    try:
+        OpenAI.api_key = OPENAI_API_KEY
 
-    client = OpenAI()
+        client = OpenAI()
 
-    completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
 
-    return completion.choices[0].message.content
+        print("return msg: ", completion.choices[0].message.content)
+        return completion.choices[0].message.content
+    except Exception as e:
+        return e
 
 @app.get("/index")
-async def index(assignment_id):
+async def index(assignment_id: str):
     try:
+        # Extract individual parameters from the payload
         """Read pdfs from docs folder and index them in vector database"""
         print("starting indexing...")
         folder_path = f"docs/{assignment_id}"

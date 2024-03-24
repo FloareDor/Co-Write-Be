@@ -13,6 +13,8 @@ from pydantic import ValidationError
 from utils.authenticator import Authenticator
 import requests
 
+# from rag_custom_data.main import chat 
+
 
 class StudentHandler:
 	def __init__(self, db):
@@ -147,7 +149,7 @@ class StudentHandler:
 
 		if existingUser is not None:
 			userType = existingUser["type"]
-			if userType != "professor":
+			if userType == "professor":
 				raise HTTPException(status_code=400, detail=f"You are not a student. Please sign up as a student.")
 
 		try:
@@ -277,7 +279,12 @@ class StudentHandler:
 			form_data = await request.form()
 			assignment_id = form_data.get("assignment_id")
 			highlighted_text = form_data.get("highlighted_text")
-			user_query = form_data.get("user_query")
+			userQuery = form_data.get("user_query")
+			print("user_query: " + userQuery)
+			print("user_query: " + userQuery)
+			print("user_query: " + userQuery)
+			print("user_query: " + userQuery)
+			print("user_query: " + userQuery)
 			assignment = self.assignments_collection.find_one({"_id": assignment_id})
 			if not assignment:
 				raise HTTPException(status_code=404, detail="Assignment not found")
@@ -285,11 +292,12 @@ class StudentHandler:
 			raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
 
 		ai_limitation = assignment["ai_limitation"]
-		chat_response = await self.call_chat_function(ai_limitation=ai_limitation, highlighted_text=highlighted_text, user_query=user_query, assignment_id=assignment_id)
+		chat_response = await self.call_chat_function(ai_limitation=ai_limitation, highlighted_text=highlighted_text, user_query=userQuery, assignment_id=assignment_id)
 		return JSONResponse(content={"response": chat_response})
 
-	async def call_chat_function(self, ai_limitation="Default", highlighted_text="", user_query="", assignment_id=""):
+	async def call_chat_function(self, user_query, ai_limitation="Default", highlighted_text="", assignment_id=""):
 		try:
+			print("call chat: ", user_query)
 			url = "http://localhost:8001/chat"
 			payload = {
 				"ai_limitation": ai_limitation,
@@ -297,7 +305,8 @@ class StudentHandler:
 				"user_query": user_query,
 				"assignment_id": assignment_id
 			}
-			response = requests.post(url, data=payload)
+			headers = {'Content-Type': 'application/json'}
+			response = requests.post(url, data=json.dumps(payload), headers=headers)
 			response.raise_for_status()
 			if response.status_code == 200:
 				return response.text
