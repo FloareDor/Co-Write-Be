@@ -61,6 +61,6 @@ def predict_sentence(query, vectorizer, classifier):
     return predicted_label[0]
 
 
-# query = "Can you help me solve this math problem?"  # Replace with your sample text
-# predicted_label = predict_sentence(query, cv, spam_detect_model)
-# print("Predicted Label:", predicted_label)
+query = "Complete"  # Replace with your sample text
+predicted_label = predict_sentence(query, cv, spam_detect_model)
+print("Predicted Label:", predicted_label)

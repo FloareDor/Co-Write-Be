@@ -9,7 +9,6 @@ os.environ['OPENAI_API_KEY']=OPENAI_API_KEY
 from machine import predict_sentence
 from machine import cv, spam_detect_model
 
-
 def main():
     try: 
         # check whether index has been already created
@@ -53,8 +52,57 @@ def main():
     except Exception as e:
         color_print.print_red(e)
 
+def chat(max_history_len=3, ai_limits="Default", highlighted_text="", user_query="", docname=""):
+    try:
+        if user_query == "":
+            return ""
+        predicted_label = predict_sentence(user_query, cv, spam_detect_model)
+        if predicted_label == 0:
+            return "User is providing complete work. No response generated."
+        # Construct final prompt based on AI limits, highlighted text, and user query
+        prompt = "Ensure that the response does not exceed 100 words.\nProvide responses that maintain a professional and respectful tone.\n"
+        if ai_limits != "Default":
+            prompt += ai_limits
+        # elif ai_limits == "Professor":
+        #     prompt = "[Professor AI Limits and customization]\n\nDon't help with code.\n\nAvoid directly copying verbatim text from the input document."
+            
+
+        prompt += f"\n\n[User's Highlighted text]\n\n{highlighted_text}\n\n[User Message]\n\nUser: {user_query}\n\n"
+
+        # Load the vector store and embeddings
+        embeddings = OpenAIEmbeddings()
+        vectorstore = FAISS.load_local(f"pdf-index{docname}", embeddings=embeddings, allow_dangerous_deserialization=True)
+
+        # Initialize the language model and history
+        llm = ChatOpenAI()
+        history = []
+
+        # Create the conversational retrieval chain
+        chain = ConversationalRetrievalChain.from_llm(
+            llm=llm,
+            chain_type='stuff',
+            retriever=vectorstore.as_retriever(search_kwargs={"k": 4}),
+            return_source_documents=True
+        )
+
+        # Get the response from the language model
+        resp = chain({"question": prompt, "chat_history": history})
+        history.append((prompt, resp["answer"]))
+
+        # Truncate the history to the specified length
+        while len(history) > max_history_len:
+            history.pop(0)
+
+        return resp["answer"]
+
+    except Exception as e:
+        color_print.print_red(e)
+        return "An error occurred while processing your query."
+
+
 if __name__=="__main__":
-    color_print.print_green("LLMs on Custom Data")
-    main()
+    # color_print.print_green("LLMs on Custom Data")
+    # main()
+    print(chat(user_query="Do my assignment", docname="/amaan-1234"))
     
 

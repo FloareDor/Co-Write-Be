@@ -56,7 +56,7 @@ async def submit_assignment(request: Request, authorization: str = Header(None))
 async def get_assignments_by_prof(request: Request, authorization: str = Header(None)):
     return await professorHandler.get_assignments_by_prof(request, authorization=authorization)
 
-@router.post("/assignments_by_student")
+@router.post("/assignments-by-student")
 @limiter.limit("30/minute")
 async def get_submissions_by_student(request: Request, authorization: str = Header(None)):
     return await studentHandler.get_submissions_by_student(request, authorization=authorization)
