@@ -1,3 +1,5 @@
+[VIDEO LINK](https://drive.google.com/file/d/1imCGSRE_liEBf4bSd-v9zH90DQaKHrIq/view?usp=sharing)
+
 # Co-Write
 
 Have you ever lost grade due to your professor marking your assignment as "used AI" falsely?
