@@ -1,6 +1,7 @@
 # Co-Write
 
 Have you ever lost grade due to the professor marking your assignment as "used AI" falsely?
+
 [Are you tired of the high error rate AI detection software, making it an annoyance to grade your students?](https://mitsloanedtech.mit.edu/ai/teach/ai-detectors-dont-work/)
 
 Enter Co-Write.
