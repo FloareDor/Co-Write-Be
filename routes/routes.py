@@ -38,42 +38,29 @@ async def verifyUser(request: Request):
 
 @router.post("/add-assignment")
 @limiter.limit("30/minute")
-async def onboard(request: Request, authorization: str = Header(None)):
+async def add_assignment(request: Request, authorization: str = Header(None)):
     return await professorHandler.add_new_assignment(request, authorization=authorization)
+
+@router.post("/open-assignment")
+@limiter.limit("30/minute")
+async def open_assignment(request: Request, authorization: str = Header(None)):
+    return await studentHandler.open_assignment(request, authorization=authorization)
 
 @router.post("/submit-assignment")
 @limiter.limit("30/minute")
-async def onboard(request: Request, authorization: str = Header(None)):
+async def submit_assignment(request: Request, authorization: str = Header(None)):
     return await studentHandler.submit_assignment(request, authorization=authorization)
 
-# @router.get("/professors", response_model=List[Dict[str, Any]])
-# @limiter.limit("30/minute")
-# async def getprofessors(request: Request, query: str = Query(None)):
-#     if query:
-#         return await professorHandler.search_professors(request, query)
-#     else:
-#         return await professorHandler.get_all_professors(request)
+@router.post("/assignments-by-prof")
+@limiter.limit("30/minute")
+async def get_assignments_by_prof(request: Request, authorization: str = Header(None)):
+    return await professorHandler.get_assignments_by_prof(request, authorization=authorization)
 
-# @router.get("/{professor}/items", response_model=List[Dict[str, Any]])
-# @limiter.limit("30/minute")
-# async def health(request: Request):
-#     return JSONResponse({"status": "ok"}, status_code=200)
+@router.post("/assignments_by_student")
+@limiter.limit("30/minute")
+async def get_submissions_by_student(request: Request, authorization: str = Header(None)):
+    return await studentHandler.get_submissions_by_student(request, authorization=authorization)
 
-# @router.post("/healthify-menu")
-# @limiter.limit("30/minute")
-# async def onboard(request: Request, authorization: str = Header(None)):
-#     return await studentHandler.healthifyMenu(request, authorization=authorization)
-
-# @router.get("/add-to-favourites", response_model=List[Dict[str, Any]])
-# @limiter.limit("30/minute")
-# async def health(request: Request):
-#     return JSONResponse({"status": "ok"}, status_code=200)
-
-# # Auth
-# @router.post("/verify_user")
-# @limiter.limit("12/minute")
-# async def verifyUser(request: Request):
-#     return await authenticator.Verify_user(request)
 
 
 

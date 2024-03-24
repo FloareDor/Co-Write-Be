@@ -11,6 +11,7 @@ class assignmentSchema(BaseModel):
     ai_limitation: Optional[str] = None
     # code: Optional[str] = None
     resource: Optional[Union[str, bytes]] = None
+    active: Optional[bool] = True
 
     class Config:
         populate_by_name = True

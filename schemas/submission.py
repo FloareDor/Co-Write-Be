@@ -6,9 +6,10 @@ from bson import ObjectId
 class submissionSchema(BaseModel):
     id: Optional[str] = None
     student_id: Optional[str] = "default_student"
-    assignment_id: ObjectId
+    assignment_id: Optional[str] = None
     submission_text: Optional[str] = None
     submission_file: Optional[Union[str, bytes]] = None
+    active: Optional[bool] = True
 
     class Config:
         populate_by_name = True

@@ -5,6 +5,7 @@ from bson import ObjectId
 from pydantic import ValidationError
 from utils.authenticator import Authenticator
 from schemas.assignment import assignmentSchema
+import re
 
 class ProfessorHandler:
     def __init__(self, db):
@@ -76,6 +77,7 @@ class ProfessorHandler:
                 "description": description,
                 "ai_limitation": ai_limitation,
                 "resource_file": None,
+                "active": True,
             }
 
             try:
@@ -105,3 +107,42 @@ class ProfessorHandler:
 
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"An error occurred: {str(e)}")
+        
+    async def get_assignments_by_prof(
+        self,
+        request: Request,
+        authorization: str = Header(None),
+    ):
+        if authorization is None:
+            raise HTTPException(status_code=500, detail="No Authorization Token Received")
+
+        try:
+            # Authorize the request
+            encodedUserData = await self.authenticator.Authorize(authorization=authorization)
+            print(encodedUserData)
+        except HTTPException as http_exception:
+            # Handle authorization errors
+            return JSONResponse(
+                {"detail": f"Authorization error: {http_exception.detail}"},
+                status_code=http_exception.status_code,
+            )
+
+        try:
+            existingUser = self.userCollection.find_one(
+                {"sub": encodedUserData["sub"]}  # Query condition
+            )
+        except Exception as e:
+            print(f"USER NOT FOUND: {e}")
+            raise HTTPException(status_code=500, detail=f"USER NOT FOUND: {encodedUserData}")
+        
+        professor_id = encodedUserData["_id"]
+        assignments = []
+        for assignment in self.assignments_collection.find({"professor_id": re.compile(professor_id, re.IGNORECASE)}).sort("title"):
+            # Convert the ObjectId to string representation before returning
+            assignment["_id"] = str(assignment["_id"])
+            assignments.append(assignment)
+        if assignments:
+            response = JSONResponse(assignments, status_code=200)
+            return response
+        else:
+            raise HTTPException(status_code=404, detail=f"No assignments posted by professor: {professor_id}")
