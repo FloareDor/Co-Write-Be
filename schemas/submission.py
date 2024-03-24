@@ -25,14 +25,7 @@ class submissionSchema(BaseModel):
         return student_id
 
     @validator('assignment_id')
-    def assignment_id_must_be_valid(cls, assignment_id):
-        if not isinstance(assignment_id, ObjectId):
+    def assignment_id_must_not_be_empty(cls, assignment_id):
+        if not isinstance(assignment_id, str):
             raise ValueError('Invalid assignment ID')
         return assignment_id
-
-    @validator('submission_text', 'submission_file')
-    def at_least_one_submission_required(cls, values):
-        submission_text, submission_file = values
-        if not submission_text and not submission_file:
-            raise ValueError('At least one submission (text or file) is required')
-        return values

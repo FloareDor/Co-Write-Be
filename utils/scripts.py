@@ -76,18 +76,18 @@ def initDB():
 
 	# restaurant collection
 	professor_collection = db["professors"]
-	professor_collection.delete_many({})
+	# professor_collection.delete_many({})
 
 	assgn_collection = db["assignments"]
-	assgn_collection.delete_many({})
+	# assgn_collection.delete_many({})
 
 	# User collection
 	user_collection = db["users"]
 	# user_collection.delete_many({})
 
 	# items collection
-	rating_collection = db["students"]
-	rating_collection.delete_many({})
+	students_collection = db["students"]
+	# students_collection.delete_many({})
 
 	return db
 

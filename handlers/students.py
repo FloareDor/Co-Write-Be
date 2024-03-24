@@ -21,6 +21,8 @@ class StudentHandler:
 		self.authenticator = Authenticator(db)
 
 	async def open_assignment(self, request: Request, authorization: str = Header(None)):
+
+		print("000")
 		if authorization is None:
 			raise HTTPException(status_code=500, detail="No Authorization Token Received")
 		try:
@@ -39,8 +41,10 @@ class StudentHandler:
 			print(f"USER NOT FOUND: {e}")
 			raise HTTPException(status_code=500, detail=f"USER NOT FOUND: {encodedUserData}")
 		try:
+			print("111")
 			form_data = await request.form()
 			assignment_id = form_data.get("assignment_id")
+			print("121")
 
 			if not all([assignment_id]):
 				raise HTTPException(
@@ -53,22 +57,22 @@ class StudentHandler:
 				detail=f"Error: {e}",
 			)
 		try:
+			print("131")
 			form_data = await request.form()
 			assignment_id = form_data.get("assignment_id")
 			student_id = encodedUserData["_id"]
-			
+			print("141")
 			existing_submission = self.submissions_collection.find_one({
 						"assignment_id": assignment_id,
 						"student_id": str(student_id)
 					})
-
+			print("151")
 			if existing_submission:
 				return JSONResponse(
 					{"message": "Submission already exists for this assignment and student"},
 					status_code=400
 				)
-
-
+			print("161")
 			submission_id = str(ObjectId())
 			submission_data = {
 					"_id": submission_id,
@@ -78,12 +82,13 @@ class StudentHandler:
 					"submission_file": None,
 					"active": True,	
 			}
+			print("22222222")
 			# Validate the submission data using the Pydantic schema
 			submission_schema = submissionSchema(**submission_data)
-
+			print("3333")
 			# Insert the submission into the database
 			result = self.submissions_collection.insert_one(submission_data)
-
+			
 			# Check if the insertion was successful
 			if not result.acknowledged:
 			# 	return JSONResponse({"message": "Opened Assignment successfully", "submission_id": submission_id}, status_code=200)
@@ -98,13 +103,16 @@ class StudentHandler:
 			existingAssignment = self.assignments_collection.find_one(
 							{"_id": assignment_id},  # Query condition
 						)
+			print("4444")
 			# Check if the insertion was successful
 			if existingAssignment:
 				existingAssignment.pop("ai_limitation")
+				print("555")
 				return JSONResponse(
 					{"message": "Assignment Joined Successfully", "assignment_details": existingAssignment},
 					status_code=200,
 				)
+				
 			else:
 				raise HTTPException(status_code=400, detail=f"Invalid assignment code: {e.errors()}")
 		except ValidationError as e:
