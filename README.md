@@ -1,10 +1,19 @@
-# HealthMyMenu
+**Co-Write**
 
-HealthMyMenu is an application that combines fitness information with a food recommendation system based on restaurant menus.
+CoWriter provides targeted AI assistance within professor-defined boundaries, making it a Canvas assistant application that helps students with assignments while maintaining originality.
 
-So, basically you can 
+**Features of Co-Write**
 
-- insert your macros and your preference for us to calculate your daily macro goals.
-- pick a restaurant and be like "I wanna have something light today, what do I got at this place?"
-- our app then tailors your macro goals to recommendations it makes for you.
+*For Professors:*
+Create Assignments: Easily set up assignments with specific details like titles, descriptions, and document attachments.
+Control AI Use: Define limitations for OpenAI access to ensure students stay on track and complete assignments independently.
+
+*For Students:*
+Targeted Assistance: Leverage CoWriter's RAG implementation to summarize PDFs and other resources, getting a head start on understanding assignments.
+Smart Prompts: Utilize the built-in machine learning model to determine if your prompt needs general help or clarification, or if it's a direct request for answer generation (which may be restricted).
+Adaptive OpenAI Integration: Access OpenAI's capabilities when professors provide resources, but with limitations to prevent plagiarism and encourage independent work.
+
+*Future Plans:*
+Use CoWriter seamlessly within the Canvas interface you're already familiar with.
+
 
