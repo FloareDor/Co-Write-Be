@@ -57,8 +57,8 @@ async def chat(request: Request):
         # Load the vector store and embeddings
         try:
             embeddings = OpenAIEmbeddings()
-            # vectorstore = FAISS.load_local(f"embeddings/{assignment_id}", embeddings=embeddings, allow_dangerous_deserialization=True)
-            vectorstore = FAISS.load_local(f"embeddings/8dj1803rj8i013jr", embeddings=embeddings, allow_dangerous_deserialization=True)
+            vectorstore = FAISS.load_local(f"embeddings/{assignment_id}", embeddings=embeddings, allow_dangerous_deserialization=True)
+
             
         except Exception as e:
             color_print.print_red(f"Error: {e}")
