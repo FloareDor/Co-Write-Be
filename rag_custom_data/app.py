@@ -6,6 +6,7 @@ from langchain.document_loaders import PyPDFLoader
 from langchain.vectorstores import FAISS
 from langchain.text_splitter import CharacterTextSplitter
 import color_print
+from openai import OpenAI
 from constants import OPENAI_API_KEY
 os.environ['OPENAI_API_KEY']=OPENAI_API_KEY
 from machine import predict_sentence
@@ -17,56 +18,57 @@ app = FastAPI()
 
 @app.post("/chat")
 async def chat(max_history_len=3, ai_limitation="Default", highlighted_text="", user_query="", assignment_id=""):
-	try:
-		if user_query == "":
-			return ""
-		predicted_label = predict_sentence(user_query, cv, spam_detect_model)
-		if predicted_label == 0:
-			return "I cannot help you with this. Please contact your professor."
-		# Construct final prompt based on AI limits, highlighted text, and user query
-		prompt = "Ensure that the response does not exceed 100 words.\nProvide responses that maintain a professional and respectful tone.\n"
-		if ai_limitation != "Default":
-			prompt += ai_limitation
-		# elif ai_limitation == "Professor":
-		#     prompt = "[Professor AI Limits and customization]\n\nDon't help with code.\n\nAvoid directly copying verbatim text from the input document."
+    try:
+        if user_query == "":
+            return ""
+        predicted_label = predict_sentence(user_query, cv, spam_detect_model)
+        if predicted_label == 0:
+            return "User is providing complete work. No response generated."
+        
+        # Construct final prompt based on AI limits, highlighted text, and user query
+        prompt = "Ensure that the response does not exceed 100 words.\nProvide responses that maintain a professional and respectful tone.\n"
+        if ai_limitation != "Default":
+            prompt += ai_limitation
+        # elif ai_limitation == "Professor":
+        #     prompt = "[Professor AI Limits and customization]\n\nDon't help with code.\n\nAvoid directly copying verbatim text from the input document."   
 
-		prompt += f"\n\n[User's Highlighted text]\n\n{highlighted_text}\n\n[User Message]\n\nUser: {user_query}\n\n"
+        prompt += f"\n\n[User's Highlighted text]\n\n{highlighted_text}\n\n[User Message]\n\nUser: {user_query}\n\n"
 
-		# Load the vector store and embeddings
-		embeddings = OpenAIEmbeddings()
-		embeddingsPath = ""
-		if assignment_id != "":
-			embeddingsPath = f"embeddings/{assignment_id}"
-		else:
-			embeddingsPath = f"embeddings"
-			
-		vectorstore = FAISS.load_local(embeddingsPath, embeddings=embeddings, allow_dangerous_deserialization=True)
+        # Load the vector store and embeddings
+        try:
+            embeddings = OpenAIEmbeddings()
+            vectorstore = FAISS.load_local(f"embeddings/{assignment_id}", embeddings=embeddings, allow_dangerous_deserialization=True)
+        except Exception as e:
+            color_print.print_red(f"Error: {e}")
+            # normal gpt bro
+            print("No embeddings found for this assignment.")
+            return normal_gpt(prompt)
 
-		# Initialize the language model and history
-		llm = ChatOpenAI()
-		history = []
+        # Initialize the language model and history
+        llm = ChatOpenAI()
+        history = []
 
-		# Create the conversational retrieval chain
-		chain = ConversationalRetrievalChain.from_llm(
-			llm=llm,
-			chain_type='stuff',
-			retriever=vectorstore.as_retriever(search_kwargs={"k": 4}),
-			return_source_documents=True
-		)
+        # Create the conversational retrieval chain
+        chain = ConversationalRetrievalChain.from_llm(
+            llm=llm,
+            chain_type='stuff',
+            retriever=vectorstore.as_retriever(search_kwargs={"k": 4}),
+            return_source_documents=True
+        )
 
-		# Get the response from the language model
-		resp = chain({"question": prompt, "chat_history": history})
-		history.append((prompt, resp["answer"]))
+        # Get the response from the language model
+        resp = chain({"question": prompt, "chat_history": history})
+        history.append((prompt, resp["answer"]))
 
-		# Truncate the history to the specified length
-		while len(history) > max_history_len:
-			history.pop(0)
+        # Truncate the history to the specified length
+        while len(history) > max_history_len:
+            history.pop(0)
 
-		return resp["answer"]
+        return resp["answer"]
 
-	except Exception as e:
-		color_print.print_red(e)
-		return "An error occurred while processing your query."
+    except Exception as e:
+        color_print.print_red(e)
+        return "An error occurred while processing your query."
 	
 def get_pdf_paths(folder_path):
     """Returns a list of the paths of all the PDFs in the given folder."""
@@ -76,6 +78,24 @@ def get_pdf_paths(folder_path):
             if file.endswith(".pdf"):
                 pdf_paths.append(os.path.join(root, file))
     return pdf_paths
+
+def normal_gpt(prompt):
+    # Set OpenAI API key programmatically
+
+    # Set OpenAI API key for the OpenAI client
+    OpenAI.api_key = OPENAI_API_KEY
+
+    client = OpenAI()
+
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    return completion.choices[0].message.content
 
 @app.get("/index")
 async def index(assignment_id):
@@ -119,4 +139,4 @@ async def index(assignment_id):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="localhost", port=8001)

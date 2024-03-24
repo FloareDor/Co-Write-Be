@@ -101,8 +101,6 @@ def chat(max_history_len=3, ai_limits="Default", highlighted_text="", user_query
             history.pop(0)
 
         return resp["answer"]
-    
-
 
     except Exception as e:
         color_print.print_red(e)
