@@ -1,6 +1,11 @@
 # Co-Write
 
-CoWriter provides targeted AI assistance within professor-defined boundaries, making it a Canvas assistant application that helps students with assignments while maintaining originality.
+Have you ever lost grade due to the professor marking your assignment as "used AI" falsely?
+[Are you tired of the high error rate AI detection software, making it an annoyance to grade your students?](https://mitsloanedtech.mit.edu/ai/teach/ai-detectors-dont-work/)
+
+Enter Co-Write.
+
+CoWriter provides targeted AI assistance within professor-defined boundaries, making it a key component for all the student infrastructure applications. We help students and professors with setting up and submitting assignments while maintaining academic integrity and learning objectives, making it fun for both the profs and the students.
 
 ## Features of Co-Write
 
