@@ -13,8 +13,17 @@ from machine import predict_sentence
 from machine import cv, spam_detect_model
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Replace with your allowed origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/chat")
 async def chat(max_history_len=3, ai_limitation="Default", highlighted_text="", user_query="", assignment_id=""):

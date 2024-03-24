@@ -76,6 +76,10 @@ async def get_assignment_by_id(request: Request, authorization: str = Header(Non
 async def get_joined_students(request: Request, authorization: str = Header(None)):
     return await professorHandler.get_joined_students(request, authorization=authorization)
 
+@router.post("/update-assignment")
+@limiter.limit("30/minute")
+async def update_assignment(request: Request, authorization: str = Header(None)):
+    return await professorHandler.update_assignment(request, authorization=authorization)
 
 
 

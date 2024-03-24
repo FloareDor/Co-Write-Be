@@ -130,6 +130,128 @@ class ProfessorHandler:
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"An error occurred: {str(e)}")
         
+    async def update_assignment(
+        self,
+        request: Request,
+        authorization: str = Header(None),
+    ):
+        if authorization is None:
+            raise HTTPException(status_code=500, detail="No Authorization Token Received")
+
+        try:
+            # Authorize the request
+            encodedUserData = await self.authenticator.Authorize(authorization=authorization)
+            print(encodedUserData)
+        except HTTPException as http_exception:
+            # Handle authorization errors
+            return JSONResponse(
+                {"detail": f"Authorization error: {http_exception.detail}"},
+                status_code=http_exception.status_code,
+            )
+
+        try:
+            existingUser = self.userCollection.find_one(
+                {"sub": encodedUserData["sub"]}  # Query condition
+            )
+        except Exception as e:
+            print(f"USER NOT FOUND: {e}")
+            raise HTTPException(status_code=500, detail=f"USER NOT FOUND: {encodedUserData}")
+
+        if existingUser is not None:
+            userType = existingUser["type"]
+            if userType != "professor":
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"You are not a professor. If you are one, please sign up as a professor.",
+                )
+
+        try:
+            form_data = await request.form()
+            assignment_id = form_data.get("assignment_id")
+            title = form_data.get("title")
+            description = form_data.get("description")
+            ai_limitation = form_data.get("ai_limitation")
+            active = form_data.get("active")
+            resource_file = form_data.get("resource_file")
+            
+
+            if not all([assignment_id]):
+                raise HTTPException(
+                    status_code=400,
+                    detail="assignment_id is required.",
+                )
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Error: {e}",
+            )
+        try:
+            existingAssignment = self.assignments_collection.find_one(
+                {"assignment_id": assignment_id}  # Query condition
+            )
+        except Exception as e:
+            print(f"assignment NOT FOUND: {e}")
+            raise HTTPException(status_code=500, detail=f"assignment NOT FOUND: {assignment_id}")
+
+        if existingAssignment is not None:
+            if existingAssignment["professor_id"] != encodedUserData["_id"]:
+                raise HTTPException(status_code=403 , detail=f"You did not create this assignment. Therefore you do not have permission to edit.")
+
+        try:
+            assignment_data = {}
+            if title:
+                assignment_data["title"] = title
+            if description:
+                assignment_data["description"] = description
+            if ai_limitation:
+                assignment_data["ai_limitation"] = ai_limitation
+            if active is not None:
+                assignment_data["active"] = active
+
+            if resource_file:
+                try:
+                    file_path = f"rag_custom_data/docs/{assignment_id}/{resource_file.filename}"
+                    with open(file_path, "wb") as buffer:
+                        shutil.copyfileobj(resource_file.file, buffer)
+                    assignment_data["resource_file"] = resource_file.filename
+                except Exception as e:
+                    print(f"resource file error: {e}")
+                    raise HTTPException(status_code=400, detail=f"resource file error: {e}")
+
+            existing_assignment = self.assignments_collection.find_one({"_id": assignment_id})
+            if existing_assignment:
+                # Update existing assignment
+                result = self.assignments_collection.update_one(
+                    {"_id": assignment_id},
+                    {"$set": assignment_data}
+                )
+            else:
+                raise HTTPException(status_code=400, detail=f"No existing assignment found: {assignment_data}")
+
+            # Validate the assignment data using the Pydantic schema
+            assignment_schema = assignmentSchema(**assignment_data)
+            # Insert the assignment into the database
+            result = self.assignments_collection.insert_one(assignment_data)
+            # Check if the insertion was successful
+            if result.acknowledged:
+                call_result = await self.call_index_function(assignment_id)
+                if call_result:
+                    print("Index function call was successful")
+                else:
+                    print("Index function call failed")
+                return JSONResponse(
+                    {"message": "Assignment added successfully", "assignment_id": assignment_id},
+                    status_code=200,
+                )
+            else:
+                return {"message": "Failed to add assignment"}
+        except ValidationError as e:
+            # Handle validation errors
+            raise HTTPException(status_code=400, detail=f"Invalid assignment data: {e.errors()}")
+
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"An error occurred: {str(e)}")
+        
     async def get_assignments_by_prof(
         self,
         request: Request,
