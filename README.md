@@ -1,4 +1,4 @@
-**This text is bold.**
+**Co-Write**
 CoWriter provides targeted AI assistance within professor-defined boundaries, making it a Canvas assistant application that helps students with assignments while maintaining originality.
 
 **Features of Co-Write**
