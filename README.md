@@ -16,4 +16,9 @@ Adaptive OpenAI Integration: Access OpenAI's capabilities when professors provid
 *Future Plans:*
 Use CoWriter seamlessly within the Canvas interface you're already familiar with.
 
+Technologies:
+Front-End: Next JS, TypeScript
+Back- End: Fast API, MONGO DB
+AI: LangChain
+
 
