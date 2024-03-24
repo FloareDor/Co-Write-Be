@@ -7,7 +7,7 @@ from utils.authenticator import Authenticator
 from handlers.professors import ProfessorHandler
 from handlers.students import StudentHandler
 
-from utils.scripts import initDB, insertSampleData
+from utils.scripts import initDB
 
 from fastapi import Query
 
@@ -31,7 +31,7 @@ async def health(request: Request):
     return JSONResponse({"status": "ok"}, status_code=200)
 
 # Auth
-@router.post("/verify_user")
+@router.post("/verify-user")
 @limiter.limit("12/minute")
 async def verifyUser(request: Request):
     return await authenticator.Verify_user(request)
@@ -45,8 +45,6 @@ async def onboard(request: Request, authorization: str = Header(None)):
 @limiter.limit("30/minute")
 async def onboard(request: Request, authorization: str = Header(None)):
     return await studentHandler.submit_assignment(request, authorization=authorization)
-
-
 
 # @router.get("/professors", response_model=List[Dict[str, Any]])
 # @limiter.limit("30/minute")

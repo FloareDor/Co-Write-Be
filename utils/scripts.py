@@ -33,40 +33,40 @@ from os import environ as env
 
 # 	print("Document inserted successfully!")
 
-def insertSampleData(file_path, db):
-	df = pd.read_csv(file_path)
-	df = df.fillna('')
+# def insertSampleData(file_path, db):
+# 	df = pd.read_csv(file_path)
+# 	df = df.fillna('')
 
-	def convert_to_schema(df):
-		restaurants = {}
-		for index, row in df.iterrows():
-			print(index,row)
-			item = {
+# 	def convert_to_schema(df):
+# 		restaurants = {}
+# 		for index, row in df.iterrows():
+# 			print(index,row)
+# 			item = {
 				
-				"name": str(row['item_name']).lower(),
-				"description": str(row['item_description']).lower(),
-				"cals": row['calories'],
-				"carbs": row['carbs'],
-				"fat": row['fat'],
-				"protein": row['protein']
-			}
-			if row['restaurant'] in restaurants:
-				restaurants[row['restaurant']]['items'].append(item)
-			else:
-				restaurants[row['restaurant']] = {
-					"_id": str(row['_id']),
-					"name": str(row['restaurant']).lower(),
-					"location": row['location'],
-					"logo": row['logo'],
-					"items": [item]
-				}
-				print(str(row['_id']))
+# 				"name": str(row['item_name']).lower(),
+# 				"description": str(row['item_description']).lower(),
+# 				"cals": row['calories'],
+# 				"carbs": row['carbs'],
+# 				"fat": row['fat'],
+# 				"protein": row['protein']
+# 			}
+# 			if row['restaurant'] in restaurants:
+# 				restaurants[row['restaurant']]['items'].append(item)
+# 			else:
+# 				restaurants[row['restaurant']] = {
+# 					"_id": str(row['_id']),
+# 					"name": str(row['restaurant']).lower(),
+# 					"location": row['location'],
+# 					"logo": row['logo'],
+# 					"items": [item]
+# 				}
+# 				print(str(row['_id']))
 		
-		return list(restaurants.values())
+# 		return list(restaurants.values())
 
-	converted_data = convert_to_schema(df)
-	collection = db["restaurants"]
-	collection.insert_many(converted_data)
+# 	converted_data = convert_to_schema(df)
+# 	collection = db["restaurants"]
+# 	collection.insert_many(converted_data)
 
 def initDB():
 	ATLAS_URL = env.get("ATLAS_URL")
@@ -77,6 +77,9 @@ def initDB():
 	# restaurant collection
 	professor_collection = db["professors"]
 	professor_collection.delete_many({})
+
+	assgn_collection = db["assignments"]
+	assgn_collection.delete_many({})
 
 	# User collection
 	user_collection = db["users"]

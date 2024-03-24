@@ -37,4 +37,5 @@ if __name__ == "__main__":
 	# ssl_cert_path = '/etc/letsencrypt/live/ratemuprofs.live/fullchain.pem'
 	# ssl_key_path = '/etc/letsencrypt/live/ratemuprofs.live/privkey.pem'
 	# uvicorn.run(app, host="0.0.0.0", port=8000, ssl_certfile=ssl_cert_path, ssl_keyfile=ssl_key_path)
+	# uvicorn.run(app, host="0.0.0.0", port=8000)
 	uvicorn.run(app, host="localhost", port=8000)

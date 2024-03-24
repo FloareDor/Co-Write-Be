@@ -80,7 +80,8 @@ class Authenticator:
 		data = await request.json()
 		token = data['accessToken']
 		userType = data['userType']
-		if userType == "student" or userType == "professor":
+		print(userType)
+		if userType != "student" and userType != "professor":
 			return JSONResponse({"error": 'userType must be either "professor" or "student"'}, status_code=400)
 		print(f"'accessToken': {token}")
 		headers = {'Authorization': f'Bearer {token}'}
@@ -119,6 +120,8 @@ class Authenticator:
 		else:
 			userData["_id"] = str(ObjectId())
 			userData["type"] = userType
+			print(userData)
+			print(userType)
 			result = self.userCollection.insert_one(userData)
 			# if "sub" in userData:
 			# 	userData.pop("sub")
